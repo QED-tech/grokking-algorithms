@@ -50,30 +50,43 @@ public class Dijkstra {
     private static void dijkstra(HashMap<String, HashMap<String, Integer>> graph, HashMap<String, Integer> costs) {
         ArrayList<String> processed = new ArrayList<>();
         String lowerCostUnprocessedNode = findLowestCostNode(costs, processed);
+        HashMap<String, String> parents = new HashMap<>();
 
-        //TODO implemented this cycle
         while (lowerCostUnprocessedNode != null) {
             int cost = costs.get(lowerCostUnprocessedNode);
-            var connectionsPoints = graph.get(lowerCostUnprocessedNode)
-                    .keySet()
-                    .iterator();
+            var connectionsPoints = graph.get(lowerCostUnprocessedNode);
 
-            do {
-                String connectionsPoint = connectionsPoints.next();
+            for (String connectionsPoint : connectionsPoints.keySet()) {
+                int newCost = cost + connectionsPoints.get(connectionsPoint);
 
-
+                if (costs.get(connectionsPoint) > newCost) {
+                    costs.put(connectionsPoint, newCost);
+                    parents.put(connectionsPoint, lowerCostUnprocessedNode);
+                }
             }
-            while (connectionsPoints.hasNext());
 
-            break;
+            processed.add(lowerCostUnprocessedNode);
+            lowerCostUnprocessedNode = findLowestCostNode(costs, processed);
         }
+
+        System.out.println(costs);
+        System.out.println(parents);
     }
 
     private static @Nullable String findLowestCostNode(HashMap<String, Integer> costs, ArrayList<String> processed) {
-        int minimumValue = 0;
+        HashMap<String, Integer> costsWithoutProcessed = (HashMap<String, Integer>) costs.clone();
+        for (String s : processed) {
+            costsWithoutProcessed.remove(s);
+        }
+
+        if (costsWithoutProcessed.isEmpty()) {
+            return null;
+        }
+
+        int minimumValue = costsWithoutProcessed.entrySet().iterator().next().getValue();
         String minimumCostNode = "";
 
-        for (Map.Entry<String, Integer> entry : costs.entrySet()) {
+        for (Map.Entry<String, Integer> entry : costsWithoutProcessed.entrySet()) {
             if (processed.contains(entry.getKey())) {
                 continue;
             }
